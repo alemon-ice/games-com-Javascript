@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>PINGO-PONG</title>
+</head>
+<body>
+    <canvas id="folha" width="610" height="510"></canvas>
+
+    <script>
+
+        window.onload = function() {
+            iniciar();
+            setInterval(principal, 1000/500);
+        }
+
+        function iniciar() {
+
+            folhaDesenho = document.getElementById("folha");
+            areaDesenho = folhaDesenho.getContext("2d");
+            larguraCampo = 600;
+            alturaCampo = 500;
+            borda = 5;
+            linha = 2;
+
+            bola = 10;
+            larguraRaquete = 5;
+            alturaRaquete = 50;
+            
+            posiPlayer1 = posiPlayer2 = alturaCampo/2 - alturaRaquete/2;
+            posiBolaX = larguraCampo/2 - bola/2;
+            posiBolaY = alturaCampo/2 - bola/2;
+
+            velBolaPosiX = velBolaPosiY = 1;
+            efeito = 0.1;
+            velPlayer2 = 1;
+
+            pontosPlayer1 = pontosPlayer2 = 0;
+
+            folhaDesenho.addEventListener('mousemove', function(e){
+                posiPlayer1 = e.clientY - alturaRaquete / 2;
+            });
+
+        }
+
+        function continuar() {
+            //centralizar a bola
+            posiBolaX = larguraCampo/2 - bola/2;
+            posiBolaY = alturaCampo/2 - bola/2;
+            velBolaPosiX = +velBolaPosiX;
+            velBolaPosiY = 1;
+        }
+
+        function desenhar() {
+            
+            areaDesenho.fillStyle = '#286047'; //cor verde
+            areaDesenho.fillRect( borda, borda, larguraCampo - borda, alturaCampo - borda);
+
+            areaDesenho.fillStyle = '#000000'; // cor preta
+            areaDesenho.fillRect( 0, 0, larguraCampo, borda);
+            areaDesenho.fillRect( 0, 0, borda, alturaCampo);
+            areaDesenho.fillRect( 0, alturaCampo, larguraCampo+borda, borda);
+            areaDesenho.fillRect( larguraCampo, 0, borda, alturaCampo+borda);
+
+            areaDesenho.fillStyle = '#FFFFFF'; //cor branca
+            areaDesenho.fillRect( larguraCampo/2 - linha/2, borda, linha, alturaCampo - borda);
+            areaDesenho.fillRect( posiBolaX, posiBolaY, bola, bola);
+            areaDesenho.fillRect( borda, posiPlayer1, larguraRaquete, alturaRaquete);
+            areaDesenho.fillRect( larguraCampo - larguraRaquete, posiPlayer2, larguraRaquete, alturaRaquete);
+            areaDesenho.fillText("Player 1 = "+ pontosPlayer1 +" pontos", 100, 50);
+            areaDesenho.fillText("Player 2 = "+ pontosPlayer2 +" pontos", 400, 50);
+        }
+
+        function calcular() {
+
+            posiBolaX = posiBolaX + velBolaPosiX;
+            posiBolaY = posiBolaY + velBolaPosiY;
+
+            //lateral superior
+            if(posiBolaY < 0 + borda && velBolaPosiY < 0) {
+                velBolaPosiY = -velBolaPosiY;
+            }
+
+            //lateral inferior
+            if(posiBolaY > alturaCampo - (borda*2) && velBolaPosiY > 0) {
+                velBolaPosiY = -velBolaPosiY;
+            }
+
+            //verificar ponto player 2
+            if(posiBolaX < borda) {
+                if(posiBolaY > posiPlayer1 && posiBolaY < posiPlayer1 + alturaRaquete) {
+                    //rebate a bola
+                    velBolaPosiX = -velBolaPosiX;
+
+                    var difeY = posiBolaY - (posiPlayer1 + alturaRaquete / 2);
+                    velBolaPosiY = difeY * efeito;
+                } else {
+                    //ponto player 2
+                    pontosPlayer2++;
+                    continuar();
+                }
+            }
+            //verificar ponto player 1
+            if(posiBolaX > larguraCampo-borda) {
+                if(posiBolaY > posiPlayer2 && posiBolaY < posiPlayer2 + alturaRaquete) {
+                    //rebate a bola
+                    velBolaPosiX = -velBolaPosiX;
+
+                    var difeY = posiBolaY - (posiPlayer2 + alturaRaquete / 2);
+                    velBolaPosiY = difeY * efeito;
+                } else {
+                    //ponto player 1
+                    pontosPlayer1++;
+                    continuar();
+                }
+            }
+
+            //movimento player 2
+            if(posiPlayer2 + alturaRaquete / 2 < posiBolaY) {
+                posiPlayer2 = posiPlayer2 + velPlayer2;
+            } else {
+                posiPlayer2 = posiPlayer2 - velPlayer2;
+            }
+        }
+
+        function principal() {
+            desenhar();
+            calcular();
+        }
+
+    </script>
+</body>
+</html>
